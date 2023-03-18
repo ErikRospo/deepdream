@@ -11,6 +11,19 @@
             "title": "CUDA",
             "type": "boolean"
         },
+        "dataLogging":{
+            "default":true,
+            
+            "description": "Whether to log timing data",
+            "title": "Log data",
+            "type":"boolean"
+        },
+        "quiet":{
+            "default":false,
+            "description": "No status logging",
+            "title": "Quiet",
+            "type":"boolean"
+        },
         "dream": {
             "default": {},
             "examples": [
@@ -304,6 +317,7 @@
             "type": "object"
         }
     },
+    
     "required": [
         "transform",
         "dream"

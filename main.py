@@ -44,7 +44,7 @@ def get_current_time_seconds():
     global elapsed
     a=time.time()-elapsed
     return a
-    
+expectedTimes=[]
 # Patching model to be able to compute gradients.
 # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
 
@@ -128,7 +128,9 @@ def fancy_status():
     remtime=format_time(total_time*left) # time remaining, again in a friendly way.
     tottime=format_time(total_time+total_time) # total time.
     fttime=format_time_diff(curr_time+total_time*left) # finish time: MM-DD-YY HH:mm:SS 
-    print(f"Outer Level: {outerLevelStr}, Octave: {octaveStr}, {percentage*100:.2f}%, elapsed time {eltime}, remaining time {remtime}, total time {tottime}, estimated finish time {fttime}")
+    expectedTimes.append((total_time,eltime,remtime,tottime,fttime))
+    if not ("quiet" in settings and settings["quiet"]):
+        print(f"Outer Level: {outerLevelStr}, Octave: {octaveStr}, {percentage*100:.2f}%, elapsed time {eltime}, remaining time {remtime}, total time {tottime}, estimated finish time {fttime}")
 #deepdream will have been called int(settings["dream"]["iterations"]) times.
 def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4, 
               end='inception_4c/output', clip=True, **step_params):
