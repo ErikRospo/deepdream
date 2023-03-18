@@ -1,0 +1,305 @@
+{
+    "$id": "SettingsSchema",
+    "type": "object",
+    "default": {},
+    "title": "Root Schema",
+    "required": [
+        "transform",
+        "dream"
+    ],
+    "properties": {
+        "transform": {
+            "type": "object",
+            "default": {},
+            "title": "Transform",
+            "description": "How to transform the each frame based on the previous one.",
+            "required": [
+                "affine"
+            ],
+            "properties": {
+                "affine": {
+                    "type": "object",
+                    "default": {},
+                    "title": "Affine Transformation",
+                    "description": "Scaling applied to each frame",
+                    "required": [
+                        "x_factor",
+                        "y_factor",
+                        "x_center",
+                        "y_center"
+                    ],
+                    "properties": {
+                        "x_factor": {
+                            "type": "number",
+                            "default": 0.0,
+                            "title": "X Scale Factor",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "description": "Amount to scale the image by on each frame (X)",
+                            "examples": [
+                                0.95
+                            ]
+                        },
+                        "y_factor": {
+                            "type": "number",
+                            "default": 0.0,
+                            "title": "Y Scale Factor",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "description": "Amount to scale the image by on each frame (Y)",
+                            "examples": [
+                                0.95
+                            ]
+                        },
+                        "x_center": {
+                            "type": "number",
+                            "default": 0.5,
+                            "title": "X scale center",
+                            
+                            "description": "Center around which the scaling is applied (X)",
+                            "minimum": 0,
+                            "maximum": 1,
+                            "examples": [
+                                0.5
+                            ]
+                        },
+                        "y_center": {
+                            "title": "Y scale center",
+                            "type": "number",
+                            "default": 0.5,
+                            "minimum": 0,
+                            "maximum": 1,
+                            "description": "Center around which the scaling is applied (Y)",
+                            "examples": [
+                                0.5
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "x_factor": 0.95,
+                        "y_factor": 0.95,
+                        "x_center": 0.5,
+                        "y_center": 0.5
+                    },{
+                        "x_factor": 0.99,
+                        "y_factor": 0.99,
+                        "x_center": 0.4,
+                        "y_center": 0.8
+                    }]
+                },
+                "rotate": {
+                    "type": "object",
+                    "default": {},
+                    "title": "Rotation",
+                    "description": "Rotation applied per frame",
+                    "required": [
+                        "angle"
+                    ],
+                    "properties": {
+                        "angle": {
+                            "type": "number",
+                            "default": 0.0,
+                            "title": "Angle",
+                            "description": "Angle rotation applied per frame.",
+                            "examples": [
+                                0.2
+                            ]
+                        }
+                    },
+                    "examples": [{
+                        "angle": 0.2
+                    }]
+                }
+            },
+            "examples": [{
+                "affine": {
+                    "x_factor": 0.95,
+                    "y_factor": 0.95,
+                    "x_center": 0.5,
+                    "y_center": 0.5
+                },
+                "rotate": {
+                    "angle": 0.2
+                }
+            }]
+        },
+        "dream": {
+            "type": "object",
+            "default": {},
+            "title": "The dream Schema",
+            "required": [
+                "iterations",
+                "iterationsPer",
+                "inputPath",
+                "output",
+                "octaves",
+                "octaveScale"
+            ],
+            "properties": {
+                "iterations": {
+                    "type": "integer",
+                    "default": 0,
+                    "title": "Frames",
+                    "description": "The number of frames to process",
+                    "examples": [
+                        10,
+                        50,
+                        1000,
+                        3000
+                    ]
+                },
+                "iterationsPer": {
+                    "type": "integer",
+                    "default": 0,
+                    "title": "Iterations",
+                    "description": "Iterations per octave",
+                    "examples": [
+                        10,
+                        20,
+                        50,
+                        100
+                    ]
+                },
+                "inputPath": {
+                    "type": "string",
+                    "default": "",
+                    "title": "Input Image",
+                    "description": "The image to input",
+                    "examples": [
+                        "sky1024px.jpg"
+                    ]
+                },
+                "output": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The output Schema",
+                    "required": [
+                        "images"
+                    ],
+                    "properties": {
+                        "images": {
+                            "type": "object",
+                            "default": {},
+                            "title": "The images Schema",
+                            "required": [
+                                "path"
+                            ],
+                            "properties": {
+                                "path": {
+                                    "type": "string",
+                                    "default": "fraes/%04d.jpg",
+                                    "title": "Frames Path",
+                                    "description": "Path to store the frames. substitution for the frame number using C style formatting.",
+                                    "examples": [
+                                        "frames/%04d.jpg"
+                                    ]
+                                }
+                            },
+                            "examples": [{
+                                "path": "frames/%04d.jpg"
+                            }]
+                        },
+                        "video": {
+                            "type": "object",
+                            "default": {},
+                            "title": "Video Options",
+                            "description": "Options on how the end video is output",
+                            "required": [
+                                "path",
+                                "codec",
+                                "fps"
+                            ],
+                            "properties": {
+                                "path": {
+                                    "type": "string",
+                                    "default": "",
+                                    "title": "Video Output Path",
+                                    "description": "Path to output the end video",
+                                    "examples": [
+                                        "frames/res.mp4",
+                                        "frames/out.mp4",
+                                        "frames/out.avi"
+                                    ]
+                                },
+                                "codec": {
+                                    "type": "string",
+                                    "default": "mp4v",
+                                    "title": "codec",
+                                    "description": "The codec to used to output the video",
+                                    "examples": [
+                                        "mp4v",
+                                        "XVID"
+                                    ]
+                                },
+                                "fps": {
+                                    "type": "integer",
+                                    "default": 15,
+                                    "title": "FPS",
+                                    "description": "The Frames Per Second (FPS) of the output video",
+                                    "examples": [
+                                        15,
+                                        24,
+                                        30,
+                                        60
+                                    ]
+                                }
+                            },
+                            "examples": [{
+                                "path": "frames/res.mp4",
+                                "codec": "mp4v",
+                                "fps": 15
+                            }]
+                        }
+                    }
+                },
+                "octaves": {
+                    "type": "integer",
+                    "default": 3,
+                    "title": "Octaves",
+                    "description": "How many Octaves (scales of applying the process) to use",
+                    "examples": [
+                        3,
+                        5,
+                        10
+                    ]
+                },
+                "octaveScale": {
+                    "type": "number",
+                    "default": 1.5,
+                    "title": "Octave Scale",
+                    "description": "The scale at which to apply the process at. for example, with octaves=5, and octaveScale=2, you will get scales of 1, 2, 4, 8 and 16",
+                    "examples": [
+                        1.4
+                    ]
+                }
+            },
+            "examples": [{
+                "iterations": 100,
+                "iterationsPer": 10,
+                "inputPath": "sky1024px.jpg",
+                "output": {
+                    "images": {
+                        "path": "frames/%04d.jpg"
+                    },
+                    "video": {
+                        "path": "frames/res.mp4",
+                        "codec": "mp4v",
+                        "fps": 15
+                    }
+                },
+                "octaves": 3,
+                "octaveScale": 1.4
+            }]
+        },
+        "cuda": {
+            "type": "boolean",
+            "default": false,
+            "title": "CUDA",
+            "description": "Whether to use CUDA or not",
+            
+            "examples": [
+                false
+            ]
+        }
+    }
+}
