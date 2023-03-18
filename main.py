@@ -13,17 +13,17 @@ with open("settings.json","rt") as f:
     settings=json.load(f)
 # If your GPU supports CUDA and Caffe was built with CUDA support,
 # uncomment the following to run Caffe operations on the GPU.
-# caffe.set_mode_gpu()
-# caffe.set_device(0) # select GPU device if multiple devices exist
+if "cuda" in settings and settings["cuda"]:
+    caffe.set_mode_gpu()
+    # caffe.set_device(0) # select GPU device if multiple devices exist
 model_path = './models/' # substitute your path here
 net_fn   = model_path + 'deploy.prototxt'
 param_fn = model_path + 'bvlc_googlenet.caffemodel'
-
+useRotate="rotate" in settings["transform"]
 # setting up progress bar.
 status={
     "topLevel":"",
-    "octave":"",
-    "innerLevel":""
+    "octave":""
 }
 # Patching model to be able to compute gradients.
 # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
@@ -74,16 +74,11 @@ def make_step(net, step_size=1.5, end='inception_4c/output',
 
 def fancy_status():
     octave=status["octave"]
-    innerLevel=status["innerLevel"]
     outerLevel=status["topLevel"]
     if octave==(-1,-1):
         octaveStr="(?/?)"
     else:
         octaveStr="({}/{})".format(*octave)
-    if innerLevel==(-1,-1):
-        innerLevelStr="(?/?)"
-    else:
-        innerLevelStr="({}/{})".format(*innerLevel)
     if outerLevel==(-1,-1):
         outerLevelStr="(?/?)"
     else:
@@ -91,8 +86,8 @@ def fancy_status():
     
     # totalIndex=int(settings["dream"]["iterations"])*int(settings['dream']['octaves'])*int(settings['dream']['iterationsPer'])
     # #TODO: find actual value given parameters
-    # currentIndex= outerLevel[1]*octave[1]*innerLevel[1]+octave[1]*innerLevel[1]+innerLevel[1]+1
-    # print("Processing file {} ({}%)".format(currentIndex, 100*totalIndex//currentIndex), end="")
+    # currentIndex= outerLevel[1]*octave[1]+octave[1]+1
+    # print("Processing file {} ({}%)".format(currentIndex, 100*(totalIndex//currentIndex)), end="")
     # print()
     # curr_time=get_current_time_seconds()
     # percentage=currentIndex/totalIndex
@@ -102,7 +97,7 @@ def fancy_status():
     # remtime=format_time(total_time*left) # time remaining, again in a friendly way.
     # tottime=format_time(total_time*percentage+total_time*left) # total time.
     # fttime=format_time_diff(total_time*percentage+total_time*left) # finish time: MM-DD-YY HH:mm:SS 
-    print("Outer Level: "+outerLevelStr+" Octave: "+octaveStr+" Inner Level: "+innerLevelStr)
+    print("Outer Level: "+outerLevelStr+" Octave: "+octaveStr)
 #deepdream will have been called int(settings["dream"]["iterations"]) times.
 def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4, 
               end='inception_4c/output', clip=True, **step_params):
@@ -115,9 +110,7 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4,
     detail = np.zeros_like(octaves[-1]) # allocate image for network-produced details
     for octave, octave_base in enumerate(octaves[::-1]):
         #this will be called int(settings["dream"]["iterations"])*octave_n
-        status["innerLevel"]=(iter_n,iter_n)
         status["octave"]=(octave+1,octave_n)
-        # "({}/{})".format(octave+1,octave_n)
         fancy_status()
         h, w = octave_base.shape[-2:]
         if octave > 0:
@@ -128,9 +121,7 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4,
         src.reshape(1,3,h,w) # resize the network's input image size
         src.data[0] = octave_base+detail
         for i in range(iter_n):
-            status["innerLevel"]=(i+1,iter_n)
-            # fancy_status()
-            #this will be called int(settings["dream"]["iterations"])*octave_n*iter_n
+            #this will be called int(settings["dream"]["iterations"])*octave_n*iter_n times
             make_step(net, end=end, clip=clip, **step_params)
 
         # extract details produced on the current octave
@@ -153,7 +144,6 @@ for i in range(int(settings['dream']['iterations'])):
     status["topLevel"]=(i+1,int(settings["dream"]["iterations"]))
     # "({}/{})".format(i+1,settings['dream']['iterations'])
     status["octave"]=(-1,-1)
-    status["innerLevel"]=(-1,-1)
     fancy_status()
     frame = deepdream(net, frame,iter_n=int(settings['dream']['iterationsPer']),octave_n=int(settings['dream']['octaves']),octave_scale=float(settings['dream']['octaveScale']))
     fp=settings["dream"]["output"]["images"]["path"]%frame_i
@@ -164,22 +154,25 @@ for i in range(int(settings['dream']['iterations'])):
                                 float(settings["transform"]["affine"]["y_factor"]),1],
                            [h*s*float(settings["transform"]["affine"]["y_center"]),
                             w*s*float(settings["transform"]["affine"]["x_center"]),0], order=1)
-    frame=nd.rotate(frame,float(settings["transform"]["rotate"]["angle"]))
+    if useRotate:
+        frame=nd.rotate(frame,float(settings["transform"]["rotate"]["angle"]))
     frame_i += 1
     
 
-paths=["frames/%04d.jpg"%i for i in range(0,100)]
-imgArray = []
-print("Starting reading")
-s=[970,1250]
-for filename in paths:
-    if os.path.exists(filename):
-        imgArray.append(cv2.resize(cv2.imread(filename),s))
-print(s)
-print("done reading")
-print("writing video")
-out = cv2.VideoWriter(settings['dream']["output"]["video"]['path'],cv2.VideoWriter_fourcc(*settings['dream']["output"]["video"]['codec']),float(settings['dream']["output"]["video"]['fps']), s)
-for i in range(len(imgArray)):
-    out.write(imgArray[i])
-out.release()
-print("Done making video")
+# paths=["frames/%04d.jpg"%i for i in range(0,100)]
+if "video" in settings["dream"]["output"]:
+    imgArray = []
+    print("Starting reading")
+    s=[970,1250]
+    for filename in paths:
+        if os.path.exists(filename):
+            imgArray.append(cv2.resize(cv2.imread(filename),s))
+    print(s)
+    print("done reading")
+    print("writing video")
+    videoSettings = settings['dream']["output"]["video"]
+    out = cv2.VideoWriter(videoSettings['path'],cv2.VideoWriter_fourcc(*videoSettings['codec']),float(videoSettings['fps']), s)
+    for i in range(len(imgArray)):
+        out.write(imgArray[i])
+    out.release()
+    print("Done making video")

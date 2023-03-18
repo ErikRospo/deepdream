@@ -17,7 +17,7 @@ if not os.path.exists("models"):
         print(r.headers)
         i=0
         maxsize=r.headers.get("content-length")
-        cs=1024*4
+        cs=4096
         for chunk in r.iter_content(chunk_size=cs):
             i+=cs
             print(f"({i}/{maxsize}): {round(100*(i/int(maxsize)),2)}%")
