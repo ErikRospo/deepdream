@@ -3,3 +3,4 @@ scipy
 pillow
 protobuf
 opencv-python
+requests

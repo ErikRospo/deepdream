@@ -1,5 +1,9 @@
 frames*/
 *.mp4
-dream.ipynb
 models
 model
+
+#virtual environments
+venv
+pyvenv
+env
