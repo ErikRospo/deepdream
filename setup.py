@@ -27,12 +27,16 @@ if not os.path.exists("models"):
         print("Model verified")
     else:
         print("Model didn't download correctly. Please try again")
+        os.rmdir("models")
         exit()
     print("model downloaded")
     print("downloading deploy.prototxt")
-    with open("models/deploy.prototxt","wb") as f:
+    with open("models/deploy.prototxt","wt") as f:
         a=requests.get("https://github.com/BVLC/caffe/raw/master/models/bvlc_googlenet/deploy.prototxt")
-        f.write(a.content)
+        b = a.text.split("\n")
+        b.insert(1,"force_backward: true")
+        c="\n".join(b)
+        f.write(c)
     print("prototxt downloaded")
 else:
     print("Model Directory already exists, not overwriting anything")

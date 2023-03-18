@@ -4,7 +4,6 @@ import os
 import numpy as np
 import scipy.ndimage as nd
 import PIL.Image
-from google.protobuf import text_format
 import json
 import caffe
 import cv2
@@ -48,12 +47,8 @@ expectedTimes=[]
 # Patching model to be able to compute gradients.
 # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
 
-model = caffe.io.caffe_pb2.NetParameter()
-text_format.Merge(open(net_fn).read(), model)
-model.force_backward = True
-open('tmp.prototxt', 'w').write(str(model))
 
-net = caffe.Classifier('tmp.prototxt', param_fn,
+net = caffe.Classifier(net_fn, param_fn,
                        mean = np.float32([104.0, 116.0, 122.0]), # ImageNet mean, training set dependent
                        channel_swap = (2,1,0)) # the reference model has channels in BGR order instead of RGB
 
