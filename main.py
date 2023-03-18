@@ -8,7 +8,20 @@ from google.protobuf import text_format
 import json
 import caffe
 import cv2
+import time
+import datetime
 
+def format_time(seconds):
+    """Converts a duration in seconds to a string in the format 'HHh MMm SSs'."""
+    delta = datetime.timedelta(seconds=int(seconds))
+    hours, remainder = divmod(delta.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
+
+def format_time_diff(seconds):
+    """Converts a duration in seconds to a string in the format 'MM-DD-YY HH:mm:SS'."""
+    end_time = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
+    return end_time.strftime("%m-%d-%y %H:%M:%S")
 with open("settings.json","rt") as f:
     settings=json.load(f)
 # If your GPU supports CUDA and Caffe was built with CUDA support,
@@ -26,6 +39,12 @@ status={
     "topLevel":"",
     "octave":""
 }
+elapsed=time.time()
+def get_current_time_seconds():
+    global elapsed
+    a=time.time()-elapsed
+    return a
+    
 # Patching model to be able to compute gradients.
 # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
 
@@ -98,7 +117,18 @@ def fancy_status():
     # remtime=format_time(total_time*left) # time remaining, again in a friendly way.
     # tottime=format_time(total_time*percentage+total_time*left) # total time.
     # fttime=format_time_diff(total_time*percentage+total_time*left) # finish time: MM-DD-YY HH:mm:SS 
-    print("Outer Level: "+outerLevelStr+" Octave: "+octaveStr)
+    totalIndex=int(settings["dream"]["iterations"])*int(settings['dream']['octaves'])*int(settings['dream']['iterationsPer'])
+    currentIndex= outerLevel[0]*octave[1]+octave[0]
+
+    curr_time=get_current_time_seconds()
+    percentage=currentIndex/totalIndex
+    left=1-percentage
+    total_time=(curr_time/currentIndex)*totalIndex
+    eltime=format_time(total_time*percentage) # time elapsed, in a friendly way, e.g. 00h 22m 15s
+    remtime=format_time(total_time*left) # time remaining, again in a friendly way.
+    tottime=format_time(total_time+total_time) # total time.
+    fttime=format_time_diff(curr_time+total_time*left) # finish time: MM-DD-YY HH:mm:SS 
+    print(f"Outer Level: {outerLevelStr}, Octave: {octaveStr}, {percentage*100:.2f}%, elapsed time {eltime}, remaining time {remtime}, total time {tottime}, estimated finish time {fttime}")
 #deepdream will have been called int(settings["dream"]["iterations"]) times.
 def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4, 
               end='inception_4c/output', clip=True, **step_params):
@@ -144,8 +174,6 @@ for i in range(int(settings['dream']['iterations'])):
     
     status["topLevel"]=(i+1,int(settings["dream"]["iterations"]))
     # "({}/{})".format(i+1,settings['dream']['iterations'])
-    status["octave"]=(-1,-1)
-    fancy_status()
     frame = deepdream(net, frame,iter_n=int(settings['dream']['iterationsPer']),octave_n=int(settings['dream']['octaves']),octave_scale=float(settings['dream']['octaveScale']))
     fp=settings["dream"]["output"]["images"]["path"]%frame_i
     PIL.Image.fromarray(np.uint8(frame)).save(fp)

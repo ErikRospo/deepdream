@@ -14,7 +14,7 @@
   "dream": {
     "iterations": 100,
     "iterationsPer": 10,
-    "inputPath": "sky1024px.jpg",
+    "inputPath": "flowers.jpg",
     "output": {
       "images": {
         "path": "frames/%04d.jpg"
