@@ -39,7 +39,14 @@ net = caffe.Classifier('tmp.prototxt', param_fn,
 
 # a couple of utility functions for converting to and from Caffe's input image layout
 def preprocess(net, img):
-    return np.float32(np.rollaxis(img, 2)[::-1]) - net.transformer.mean['data']
+    a = np.rollaxis(img, 2)
+    b = np.float32(a)
+    c = b - net.transformer.mean['data']
+    print(img.shape) # prints (224, 224, 3)
+    print(a.shape) # prints (3, 224, 224)
+    print(b.shape) # prints (3, 224, 224)
+    print(c.shape) # prints (3, 224, 224)
+    return c
 def deprocess(net, img):
     return np.dstack((img + net.transformer.mean['data'])[::-1])
 def showarray(a, fmt='jpeg'):
@@ -55,18 +62,26 @@ def make_step(net, step_size=1.5, end='inception_4c/output',
 
     src = net.blobs['data'] # input image is stored in Net's 'data' blob
     dst = net.blobs[end]
-
+    print('Input shape:', net.blobs['data'].data.shape)
+    print('Output shape:', net.blobs[end].data.shape)
     ox, oy = np.random.randint(-jitter, jitter+1, 2)
     src.data[0] = np.roll(np.roll(src.data[0], ox, -1), oy, -2) # apply jitter shift
             
+    print("forward START")
     net.forward(end=end)
+    print("forward DONE")
     objective(dst)  # specify the optimization objective
+    print("backward START")
+    
     net.backward(start=end)
+    print("backward DONE")
     g = src.diff[0]
     # apply normalized ascent step to the input image
     src.data[:] += step_size/np.abs(g).mean() * g
+    print(src.data.shape)
 
     src.data[0] = np.roll(np.roll(src.data[0], -ox, -1), -oy, -2) # unshift image
+    print(src.data.shape)
             
     if clip:
         bias = net.transformer.mean['data']
@@ -108,6 +123,7 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4,
               end='inception_4c/output', clip=True, **step_params):
     # prepare base images for all octaves
     octaves = [preprocess(net, base_img)]
+    print(octaves)
     for i in range(octave_n-1):
         octaves.append(nd.zoom(octaves[-1], (1, 1.0/octave_scale,1.0/octave_scale), order=1))
     
@@ -139,7 +155,7 @@ def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4,
     return deprocess(net, src.data[0])
 
 os.system('clear')    
-img = np.float32(PIL.Image.open(settings['dream']['inputPath']))
+img = np.float32(PIL.Image.open(settings['dream']['inputPath']).resize((224,224)))
 os.makedirs(os.path.split(settings["dream"]["output"]["images"]["path"])[0],exist_ok=True)
 frame = img
 frame_i = 0
@@ -155,7 +171,7 @@ for i in range(int(settings['dream']['iterations'])):
     status["octave"]=(-1,-1)
     status["innerLevel"]=(-1,-1)
     fancy_status()
-    frame = deepdream(net, frame,iter_n=int(settings['dream']['iterationsPer']),octave_n=int(settings['dream']['octaves']),octave_scale=float(settings['dream']['octaveScale']))
+    frame = deepdream(net, frame,iter_n=int(settings['dream']['iterationsPer']),octave_n=int(settings['dream']['octaves']),octave_scale=float(settings['dream']['octaveScale']),end="prob")
     fp=settings["dream"]["output"]["images"]["path"]%frame_i
     PIL.Image.fromarray(np.uint8(frame)).save(fp)
     paths.append(fp)

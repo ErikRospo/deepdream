@@ -16,10 +16,10 @@
     "inputPath": "sky1024px.jpg",
     "output": {
       "images": {
-        "path": "frames11/%04d.jpg"
+        "path": "frames/%04d.jpg"
       },
       "video": {
-        "path": "frames11/res.mp4",
+        "path": "frames/res.mp4",
         "codec": "mp4v",
         "fps": 15
       }
