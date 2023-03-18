@@ -13,9 +13,6 @@
             "default": {},
             "title": "Transform",
             "description": "How to transform the each frame based on the previous one.",
-            "required": [
-                "affine"
-            ],
             "properties": {
                 "affine": {
                     "type": "object",

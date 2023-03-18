@@ -20,6 +20,7 @@ model_path = './models/' # substitute your path here
 net_fn   = model_path + 'deploy.prototxt'
 param_fn = model_path + 'bvlc_googlenet.caffemodel'
 useRotate="rotate" in settings["transform"]
+useAffine="affine" in settings["transform"]
 # setting up progress bar.
 status={
     "topLevel":"",
@@ -149,11 +150,12 @@ for i in range(int(settings['dream']['iterations'])):
     fp=settings["dream"]["output"]["images"]["path"]%frame_i
     PIL.Image.fromarray(np.uint8(frame)).save(fp)
     paths.append(fp)
-    frame = nd.affine_transform(frame,
-                               [float(settings["transform"]["affine"]["x_factor"]),
-                                float(settings["transform"]["affine"]["y_factor"]),1],
-                           [h*s*float(settings["transform"]["affine"]["y_center"]),
-                            w*s*float(settings["transform"]["affine"]["x_center"]),0], order=1)
+    if useAffine:
+        frame = nd.affine_transform(frame,
+                                [float(settings["transform"]["affine"]["x_factor"]),
+                                    float(settings["transform"]["affine"]["y_factor"]),1],
+                            [h*s*float(settings["transform"]["affine"]["y_center"]),
+                                w*s*float(settings["transform"]["affine"]["x_center"]),0], order=1)
     if useRotate:
         frame=nd.rotate(frame,float(settings["transform"]["rotate"]["angle"]))
     frame_i += 1
