@@ -167,6 +167,7 @@ s = 0.05 # scale coefficient
 paths=[]
 
 ##at the end, i will be equal to int(settings["dream"]["iterations"])
+
 for i in range(int(settings['dream']['iterations'])):
     
     status["topLevel"]=(i+1,int(settings["dream"]["iterations"]))
@@ -203,3 +204,12 @@ if "video" in settings["dream"]["output"]:
         out.write(imgArray[i])
     out.release()
     print("Done making video")
+if "dataLogging" in settings and settings["dataLogging"]["log"]:
+    import csv
+    with open(settings["dataLogging"]["path"],"wt") as f:
+        a=csv.writer(f)
+        #expectedTimes.append((total_time,eltime,remtime,tottime,fttime))
+        
+        a.writerow(["Total Time","Elapsed Time","Remaining time","Total Time","Finish Time"])
+        a.writerows(expectedTimes)
+        

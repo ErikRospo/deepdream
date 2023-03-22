@@ -11,18 +11,36 @@
             "title": "CUDA",
             "type": "boolean"
         },
-        "dataLogging":{
-            "default":true,
-            
-            "description": "Whether to log timing data",
+        "dataLogging": {
+            "default": {},
+            "dependencies": {
+                "log": [
+                    "path"
+                ]
+            },
+            "description": "Data logging options",
+            "properties": {
+                "log": {
+                    "default": true,
+                    "description": "if logging should be enabled",
+                    "title": "Logging",
+                    "type": "boolean"
+                },
+                "path": {
+                    "default": "./log.csv",
+                    "description": "Where to log the data out to",
+                    "examples": [
+                        "./log.csv"
+                    ],
+                    "title": "Output",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "log"
+            ],
             "title": "Log data",
-            "type":"boolean"
-        },
-        "quiet":{
-            "default":false,
-            "description": "No status logging",
-            "title": "Quiet",
-            "type":"boolean"
+            "type": "object"
         },
         "dream": {
             "default": {},
@@ -198,6 +216,12 @@
             "title": "The dream Schema",
             "type": "object"
         },
+        "quiet": {
+            "default": false,
+            "description": "No status logging",
+            "title": "Quiet",
+            "type": "boolean"
+        },
         "transform": {
             "default": {},
             "description": "How to transform the each frame based on the previous one.",
@@ -317,7 +341,6 @@
             "type": "object"
         }
     },
-    
     "required": [
         "transform",
         "dream"

@@ -12,7 +12,7 @@
     }
   },
   "dream": {
-    "iterations": 100,
+    "iterations": 1000,
     "iterationsPer": 10,
     "inputPath": "flowers.jpg",
     "output": {
@@ -27,6 +27,10 @@
     },
     "octaves": 3,
     "octaveScale": 1.4
+  },
+  "dataLogging": {
+    "log": true,
+    "path": "./log.csv"
   },
   "cuda":false
 }
