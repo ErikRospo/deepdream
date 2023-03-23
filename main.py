@@ -6,7 +6,6 @@ import scipy.ndimage as nd
 import PIL.Image
 import json
 import caffe
-import cv2
 import time
 import datetime
 
@@ -190,6 +189,8 @@ for i in range(int(settings['dream']['iterations'])):
 # paths=["frames/%04d.jpg"%i for i in range(0,100)]
 if "video" in settings["dream"]["output"]:
     imgArray = []
+    import cv2
+
     print("Starting reading")
     s=[970,1250]
     for filename in paths:

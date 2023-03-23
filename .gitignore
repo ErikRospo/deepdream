@@ -7,3 +7,4 @@ model
 venv
 pyvenv
 env
+__pycache__/
