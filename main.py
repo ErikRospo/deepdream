@@ -111,7 +111,7 @@ def fancy_status():
     # remtime=format_time(total_time*left) # time remaining, again in a friendly way.
     # tottime=format_time(total_time*percentage+total_time*left) # total time.
     # fttime=format_time_diff(total_time*percentage+total_time*left) # finish time: MM-DD-YY HH:mm:SS 
-    totalIndex=int(settings["dream"]["iterations"])*int(settings['dream']['octaves'])*int(settings['dream']['iterationsPer'])
+    totalIndex=int(settings["dream"]["iterations"])*int(settings['dream']['octaves'])
     currentIndex= outerLevel[0]*octave[1]+octave[0]
 
     curr_time=get_current_time_seconds()
@@ -120,11 +120,11 @@ def fancy_status():
     total_time=(curr_time/currentIndex)*totalIndex
     eltime=format_time(total_time*percentage) # time elapsed, in a friendly way, e.g. 00h 22m 15s
     remtime=format_time(total_time*left) # time remaining, again in a friendly way.
-    tottime=format_time(total_time+total_time) # total time.
+    tottime=format_time(total_time) # total time.
     fttime=format_time_diff(curr_time+total_time*left) # finish time: MM-DD-YY HH:mm:SS 
     expectedTimes.append((total_time,eltime,remtime,tottime,fttime))
     if not ("quiet" in settings and settings["quiet"]):
-        print(f"Outer Level: {outerLevelStr}, Octave: {octaveStr}, {percentage*100:.2f}%, elapsed time {eltime}, remaining time {remtime}, total time {tottime}, estimated finish time {fttime}")
+        print(f"Outer Level: {outerLevelStr}, Octave: {octaveStr}, {percentage*100:5.2f}%, elapsed time {eltime}, remaining time {remtime}, total time {tottime}, estimated finish time {fttime}")
 #deepdream will have been called int(settings["dream"]["iterations"]) times.
 def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4, 
               end='inception_4c/output', clip=True, **step_params):

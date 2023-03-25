@@ -2,9 +2,12 @@ frames*/
 *.mp4
 models
 model
-
+# caffe install folder
+caffe/ 
 #virtual environments
 venv
 pyvenv
 env
+
 __pycache__/
+log.csv
